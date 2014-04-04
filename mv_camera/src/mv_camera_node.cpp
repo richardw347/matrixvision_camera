@@ -42,7 +42,6 @@
 
 */
 
-
 /** Main node entry point. */
 int main(int argc, char **argv)
 {
@@ -51,19 +50,15 @@ int main(int argc, char **argv)
   ros::NodeHandle priv_nh("~");
   ros::NodeHandle camera_nh("camera");
   mv_camera::MVCameraDriver dvr(priv_nh, camera_nh);
-
   dvr.setup();
     
-    int cnt = 0;
-    
+  int cnt = 0;
   while (node.ok())
-    {
-        dvr.poll();
-        ros::spinOnce();
-        
-        cnt++;
-    }
+  {
+    dvr.poll();
+    ros::spinOnce();
+    cnt++;
+  }
   dvr.shutdown();
-
   return 0;
 }

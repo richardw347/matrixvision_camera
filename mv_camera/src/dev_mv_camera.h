@@ -75,6 +75,8 @@ public:
 
   int open(MVCameraConfig &newconfig);
   int close();
+
+  /** Return an image frame */
   void readData(sensor_msgs::Image &image);
 
   /** check whether CameraInfo matches current video mode

@@ -134,6 +134,7 @@ bool Features::setFramerate(const double & fps_suggested, double * fps_returned)
     // define a HRTC program that results in a define image frequency
     // the hardware real time controller shall be used to trigger an image
     bluefox_settings.triggerSource.write(ctsRTCtrl);
+
     // when the hardware real time controller switches the trigger signal to
     // high the exposure of the image shall start
     bluefox_settings.triggerMode.write(ctmOnHighLevel); // ctmOnHighLevel

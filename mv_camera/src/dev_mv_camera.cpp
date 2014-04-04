@@ -43,43 +43,43 @@
 
 // @todo eliminate these macros
 //! Macro for throwing an exception with a message
-#define CAM_EXCEPT(except, msg)					\
-		{								\
-	char buf[100];						\
-	snprintf(buf, 100, "[MVCamera::%s]: " msg, __FUNCTION__); \
-	throw except(buf);						\
-		}
+#define CAM_EXCEPT(except, msg)                             \
+{							    \
+  char buf[100];					    \
+  snprintf(buf, 100, "[MVCamera::%s]: " msg, __FUNCTION__); \
+  throw except(buf);                                        \
+}
 
 //! Macro for throwing an exception with a message, passing args
 #define CAM_EXCEPT_ARGS(except, msg, ...)				\
-		{									\
-	char buf[100];							\
-	snprintf(buf, 100, "[MVCamera::%s]: " msg, __FUNCTION__, __VA_ARGS__); \
-	throw except(buf);							\
-		}
+{									\
+  char buf[100];							\
+  snprintf(buf, 100, "[MVCamera::%s]: " msg, __FUNCTION__, __VA_ARGS__);\
+  throw except(buf);							\
+}
 
 using namespace mv_camera;
 using namespace mvIMPACT::acquire;
 using namespace std;
 
 MVCamera::MVCamera() :
-    use_ros_time_(true), embed_image_info_(true), cam_(NULL)
+    use_ros_time_(true),
+    embed_image_info_(true),
+    cam_(NULL)
 {
   rosTimeOffset_ = -1;
 
-  int ret = 0;
-
-  // from http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+// from http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define xstr(s) str(s)
 #define str(s) #s
 
+  int ret = 0;
   ret += setenv("GENICAM_ROOT", xstr(GENICAM_ROOT), 1);
   ret += setenv("GENICAM_ROOT_V2_3", xstr(GENICAM_ROOT_V2_3), 1);
   ret += setenv("GENICAM_GENTL64_PATH", xstr(GENICAM_GENTL64_PATH), 1);
   ret += setenv("GENICAM_LOG_CONFIG_V2_3", xstr(GENICAM_LOG_CONFIG_V2_3), 1);
 
   ROS_WARN_STREAM_COND(ret != 0, "couldn't set BlueCOUGAR environment variables ");
-
 //  ROS_INFO_STREAM("ENV_test:"<<getenv("GENICAM_ROOT"));
 
   dev_mgr_.reset(new mvIMPACT::acquire::DeviceManager);
@@ -190,6 +190,7 @@ int MVCamera::open(mv_camera::MVCameraConfig &newconfig)
 
   use_ros_time_ = newconfig.use_ros_time;
   embed_image_info_ = newconfig.embed_image_info;
+
   //////////////////////////////////////////////////////////////
   // initialize feature settings
   //////////////////////////////////////////////////////////////
@@ -338,9 +339,10 @@ void MVCamera::clearRequestQueue()
   cam_fi_->imageRequestReset(0, 0);
 }
 
-/** Return an image frame */
 void MVCamera::readData(sensor_msgs::Image& image)
 {
+  // http://www.matrix-vision.com/manuals/SDK_NET/ImageAcquisition_page_0.html
+
   ROS_ASSERT_MSG(cam_, "Attempt to read from camera that is not open.");
   static int err_cnt = 0;
 
@@ -369,7 +371,6 @@ void MVCamera::readData(sensor_msgs::Image& image)
     req = cam_fi_->getRequest(request_nr);
     if (req->isOK())
     {
-
       fillSensorMsgs(image, req, time_now);
       features_->getImageInfo().width = image.width;
       features_->getImageInfo().height = image.height;

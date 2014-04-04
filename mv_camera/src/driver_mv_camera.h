@@ -60,12 +60,29 @@ class MVCameraDriver
 {
 public:
 
-  // public methods
   MVCameraDriver(ros::NodeHandle priv_nh, ros::NodeHandle camera_nh);
   ~MVCameraDriver();
+
+  /** device poll
+   *
+   * This function is called in the main loop to acquire frames.
+   * It creates a new image message and gives its pointer to the read() function
+   * which then queries the device for the image data. On success, the image is
+   * published. Does not run concurrently with reconfig().
+   */
   void poll(void);
+
+  /** Driver initialization
+   *
+   * Define dynamic reconfigure callback, which gets called immediately with
+   * level 0xffffffff.  The reconfig() method will set initial parameter values,
+   * then open the device if it can.
+   */
   void setup(void);
+
+  /** driver termination */
   void shutdown(void);
+
   void pollSingle(std::string& outputString);
 
   bool pollPropertyMapCallback(PropertyMap::Request &req, PropertyMap::Response &res);
@@ -75,11 +92,41 @@ public:
 
 private:
 
-  // private methods
   void closeCamera();
+
+  /** Open the camera device.
+   *
+   * @param newconfig configuration parameters
+   * @return true, if successful
+   *
+   * if successful:
+   *   state_ is Driver::OPENED
+   *   camera_name_ set to GUID string
+   */
   bool openCamera(MVCameraConfig &newconfig);
+
+  /** Publish camera stream topics
+   *
+   *  @param image points to latest camera frame
+   */
   void publish(const sensor_msgs::ImagePtr &image);
+
+  /** Read camera data .
+   *
+   * @param image points to camera Image message
+   * @return true if successful, with image filled in
+   */
   bool read(sensor_msgs::ImagePtr &image);
+
+  /** Dynamic reconfigure callback
+   *
+   *  Called immediately when callback first defined. Called again
+   *  when dynamic reconfigure starts or changes a parameter value.
+   *
+   *  @param newconfig new Config values
+   *  @param level bit-wise OR of reconfiguration levels for all
+   *               changed parameters (0xffffffff on initial call)
+   **/
   void reconfig(MVCameraConfig &newconfig, uint32_t level);
 
   void processParameterList();
